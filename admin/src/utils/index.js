@@ -1,0 +1,20 @@
+export const availableRolesList = ['SUPER_ADMIN', 'USER'];
+
+export const availablePermissionsList = [
+  'CREATE_EMPLOYEE',
+  'VIEW_EMPLOYEES',
+  'UPDATE_EMPLOYEE',
+  'DELETE_EMPLOYEE',
+
+  'CREATE_ROLE',
+  'VIEW_ROLES',
+  'UPDATE_ROLE',
+  'DELETE_ROLE',
+
+  'CREATE_PERMISSION',
+  'VIEW_PERMISSIONS',
+  'UPDATE_PERMISSION',
+  'DELETE_PERMISSION',
+
+  'UPDATE_DASHBOARD_DETAILS',
+];
