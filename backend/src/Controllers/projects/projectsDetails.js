@@ -113,10 +113,12 @@ export const updateProject = asyncHandler(async (req, res, next) => {
 // @desc - get particlar projects
 // @route -GET api/v1/projects/:id
 export const getParticularProjects = asyncHandler(async (req, res, next) => {
-  const data = await projects.find({
-    assignedTo: { $in: req?.params?.id },
-  }).populate("technology", ["technology", "_id"])
-    .populate("assignedTo", ["_id", "name", "email", "avatar"]
+  const data = await projects
+    .find({
+      assignedTo: { $in: req?.params?.id },
+    })
+    .populate("technology", ["technology", "_id"])
+    .populate("assignedTo", ["_id", "name", "email", "avatar"]);
   res.status(200).json({
     status: true,
     message: data?.length >= 1 ? "Data found successfully" : "No data found",

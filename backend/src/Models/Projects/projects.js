@@ -13,12 +13,12 @@ const projectSchema = new mongoose.Schema(
         const randomsCharcters =
           "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         let projectCode = "";
-
+   
         for (let i = 0; i < 10; i++) {
           const miscIndex = Math.floor(Math.random() * randomsCharcters.length);
           projectCode += randomsCharcters.charAt(miscIndex);
         }
-
+   
         return `${this?.name?.slice(0, 4)}/${projectCode}`;
       },
     },

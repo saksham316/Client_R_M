@@ -1,3 +1,4 @@
+// ----------------------------------------------Imports-----------------------------------------
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -10,8 +11,9 @@ import { useSelector } from 'react-redux';
 import Login from './pages/Authentication/Login';
 import './common/styles.css';
 import ResetLoginPassword from './pages/Authentication/ResetLoginPassword';
+import { ProtectedRouteHandler } from './layout/ProtectedRouteHandler';
 
-// ----------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------
 
 const DefaultLayout = lazy(() => import('./layout/DefaultLayout'));
 
@@ -63,21 +65,36 @@ function App() {
             }
           />
           {routes.map((routes, index) => {
-            const { path, component: Component } = routes;
+            const {
+              path,
+              component: Component,
+              allowedRoles,
+              allowedSubRoles,
+            } = routes;
             return (
               <Route
-                key={index}
-                path={path}
                 element={
-                  <Suspense fallback={<Loader />}>
-                    {isUserLoggedIn ? (
-                      <Component />
-                    ) : (
-                      <Navigate to="/auth/login" />
-                    )}
-                  </Suspense>
+                  <ProtectedRouteHandler
+                    allowedRoles={allowedRoles}
+                    allowedSubRoles={allowedSubRoles}
+                  />
                 }
-              />
+                key={index}
+              >
+                <Route
+                  key={index}
+                  path={path}
+                  element={
+                    <Suspense fallback={<Loader />}>
+                      {isUserLoggedIn ? (
+                        <Component />
+                      ) : (
+                        <Navigate to="/auth/login" />
+                      )}
+                    </Suspense>
+                  }
+                />
+              </Route>
             );
           })}
         </Route>

@@ -7,8 +7,10 @@ import authReducer from './slices/auth/authenticationSlice';
 import roleReducer from './slices/auth/roleSlice';
 import permissionReducer from './slices/auth/permissionSlice';
 import employeeReducer from './slices/auth/employeeSlice';
+import { coderTaskReducer } from './slices/project/task/coder/coderSlice';
+import { bucketReducer } from './slices/project/task/bucket/bucketSlice';
 
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 
 const persistConfig = {
   key: 'root',
@@ -31,6 +33,8 @@ const reducer = combineReducers({
   roles: roleReducer,
   permissions: permissionReducer,
   employees: employeeReducer,
+  coderTask: coderTaskReducer,
+  bucket: bucketReducer,
   // omitedPart: OmitReducer // not persisting this reducer
 });
 

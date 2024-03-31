@@ -25,7 +25,6 @@ import {
 import { verifyTokenMiddleware } from "../../../Middlewares/Auth/verifyTokenMiddleware.js";
 
 // -----------------------------------------------------------------------------------------------------
-
 const adminAuthRouter = express.Router();
 
 // -----------------------------------------Authentication Routes---------------------------------------
@@ -35,7 +34,7 @@ const adminAuthRouter = express.Router();
 adminAuthRouter.route("/signUp").post(parseMedia("avatar"), signUp);
 // signUp userVerification
 adminAuthRouter.route("/signUp/:id").get(userVerificationLink);
-
+ 
 // login admin
 adminAuthRouter.route("/login").post(adminLogin);
 
@@ -60,7 +59,7 @@ adminAuthRouter
 // getAllRoles
 adminAuthRouter.route("/role").get(verifyTokenMiddleware, getAllRoles);
 
-// getIndividualRoles
+// getIndividualRole
 adminAuthRouter
   .route("/role/:roleId")
   .get(verifyTokenMiddleware, getIndividualRole);

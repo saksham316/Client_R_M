@@ -104,4 +104,22 @@ export const fetchIdSpecificEmployeeDetails = createAsyncThunk(
     }
   }
 );
+
+// getAllCoders -- action to fetch all the coders
+export const getAllCoders = createAsyncThunk(
+  'employees/getAllCoders',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`admin/employee/coder`, payload, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
 // ===================================================== THE END ===========================================

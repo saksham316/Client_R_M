@@ -36,7 +36,14 @@ export const verifyTokenMiddleware = async (req, res, next) => {
 
           const userIdentification = await employeeModel.findOne(
             { _id: id },
-            { isDisabled: 1, assignedCategories: 1, _id: 1, role: 1 }
+            {
+              isDisabled: 1,
+              assignedCategories: 1,
+              _id: 1,
+              role: 1,
+              firstName: 1,
+              lastName: 1,
+            }
           );
 
           if (userIdentification?.disabled) {
@@ -47,7 +54,7 @@ export const verifyTokenMiddleware = async (req, res, next) => {
           } // If everything is fine, continue to the next middleware or route handler.
           req.userId = id;
           req.email = userIdentification?.email;
-
+          req.userName = `${userIdentification?.firstName} ${userIdentification?.lastName}`;
           return next();
         } catch (error) {
           console.log(

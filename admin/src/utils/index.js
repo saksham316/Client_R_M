@@ -1,20 +1,11 @@
-export const availableRolesList = ['SUPER_ADMIN', 'USER'];
+//allRoles - roles for all the routes
+export const allRoles = ['0', '1', '2'];
 
-export const availablePermissionsList = [
-  'CREATE_EMPLOYEE',
-  'VIEW_EMPLOYEES',
-  'UPDATE_EMPLOYEE',
-  'DELETE_EMPLOYEE',
+// adminRoles - roles for the routes which only admins can access
+export const adminRoles = ['0', '1'];
 
-  'CREATE_ROLE',
-  'VIEW_ROLES',
-  'UPDATE_ROLE',
-  'DELETE_ROLE',
+// managerSubRoles - roles of the managers
+export const managerSubRoles = ['0', '1'];
 
-  'CREATE_PERMISSION',
-  'VIEW_PERMISSIONS',
-  'UPDATE_PERMISSION',
-  'DELETE_PERMISSION',
-
-  'UPDATE_DASHBOARD_DETAILS',
-];
+// employeeSubRoles - roles for the employees
+export const employeeSubRoles = ['3', '4'];

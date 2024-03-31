@@ -56,6 +56,8 @@ import {
   productionWhiteListedIpAddresses,
 } from "./utils/index.js";
 import { adminDepartmentRouter } from "./src/Routes/Department/departmentRoutes.js";
+import { adminCoderTaskRouter } from "./src/Routes/Project/Task/Coder/coderTaskRoutes.js";
+import { adminTaskRouter } from "./src/Routes/Project/Task/taskRoutes.js";
 
 // versionOne -- used to append api/v1 to all the routes
 function versionOne(parameters) {
@@ -66,6 +68,8 @@ function versionOne(parameters) {
 app.use(versionOne("admin/auth"), adminAuthRouter);
 app.use(versionOne("admin/employee"), adminEmployeeRouter);
 app.use(versionOne("admin/department"), adminDepartmentRouter);
+app.use(versionOne("admin/task"), adminTaskRouter);
+app.use(versionOne("admin/task/coder"), adminCoderTaskRouter);
 
 // Client Routes
 app.use(versionOne("client/auth"), clientAuthRouter);

@@ -8,14 +8,14 @@ const ReactSkeletonLoading = ({ thCount }) => {
     <>
       {Array(8)
         .fill(0)
-        .map((item) => {
+        .map((item, index) => {
           return (
-            <tr>
+            <tr key={index}>
               {Array(thCount)
                 .fill(0)
-                .map((item) => {
+                .map((item, index) => {
                   return (
-                    <td style={{ padding: '8px' }}>
+                    <td style={{ padding: '8px' }} key={index}>
                       <Skeleton height={20} />
                     </td>
                   );

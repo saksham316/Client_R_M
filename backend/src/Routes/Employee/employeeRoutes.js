@@ -4,6 +4,7 @@ import { parseMedia } from "../../Middlewares/parseMedia.js";
 import {
   createEmployee,
   deleteEmployee,
+  getAllCoders,
   getAllEmployees,
   getIndividualEmployee,
   updateEmployee,
@@ -21,6 +22,9 @@ export const adminEmployeeRouter = Router();
 adminEmployeeRouter
   .route("/")
   .post(verifyTokenMiddleware, parseMedia("avatar"), createEmployee);
+
+// getAllCoders
+adminEmployeeRouter.route("/coder").get(verifyTokenMiddleware, getAllCoders);
 
 // updateEmployee
 adminEmployeeRouter

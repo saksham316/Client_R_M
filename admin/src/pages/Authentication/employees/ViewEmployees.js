@@ -11,20 +11,27 @@ import { TfiViewListAlt } from 'react-icons/tfi';
 import {
   deleteEmployee,
   fetchCompleteEmployeesList,
+  getAllCoders,
 } from '../../../features/actions/auth/employeeActions';
 import Highlighter from 'react-highlight-words';
 
 // -----------------------------------------------------------------------------------------------------------------
 
 const ViewEmployees = () => {
+  // --------------------------------------------------States---------------------------------------------------
+  const [searchedValue, setSearchedValue] = useState('');
+  const [employeesData, setEmployeesData] = useState([]);
+  const [codersData, setCodersData] = useState([]);
+  // -----------------------------------------------------------------------------------------------------------
+  // --------------------------------------------------Hooks----------------------------------------------------
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { employeesList, isLoading } = useSelector((state) => state?.employees);
-
-  const [searchedValue, setSearchedValue] = useState('');
-  const [employeesData, setEmployeesData] = useState([]);
-
+  const { employeesList, isLoading, coders } = useSelector(
+    (state) => state?.employees
+  );
+  // ------------------------------------------------------------------------------------------------------------
+  // -------------------------------------------------Functions-------------------------------------------------
   // This method is used to show confirm alert during employee delete.
   const handleEmployeeDelete = (employeeId) => {
     try {
@@ -86,7 +93,8 @@ const ViewEmployees = () => {
       setEmployeesData(filterData);
     }
   };
-
+  // -----------------------------------------------------------------------------------------------------------
+  // -------------------------------------------------useEffect-------------------------------------------------
   useEffect(() => {
     if (employeesList?.length > 0) {
       setEmployeesData(employeesList);
@@ -96,6 +104,7 @@ const ViewEmployees = () => {
   useEffect(() => {
     dispatch(fetchCompleteEmployeesList({ limit: Infinity }));
   }, []);
+  // -----------------------------------------------------------------------------------------------------------
 
   return (
     <>
@@ -195,6 +204,12 @@ const ViewEmployees = () => {
                         scope="col"
                         className="px-4 py-3.5 text-center text-sm font-normal text-gray-700 dark:text-white"
                       >
+                        Sub Role
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-4 py-3.5 text-center text-sm font-normal text-gray-700 dark:text-white"
+                      >
                         Is Disabled
                       </th>
 
@@ -264,7 +279,7 @@ const ViewEmployees = () => {
                               highlightClassName="text-meta-1"
                               searchWords={[searchedValue]}
                               autoEscape={true}
-                              textToHighlight={employee?.name}
+                              textToHighlight={`${employee?.firstName} ${employee?.lastName}`}
                             />
                           </td>
 
@@ -272,7 +287,10 @@ const ViewEmployees = () => {
                             {employee?.email || 'N.A'}
                           </td>
                           <td className="whitespace-nowrap px-4 py-4 text-center text-sm font-medium">
-                            {employee?.role?.roleName || 'N.A'}
+                            {employee?.role || 'N.A'}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-4 text-center text-sm font-medium">
+                            {employee?.subRole || 'N.A'}
                           </td>
                           <td className="whitespace-nowrap px-4 py-4 text-center text-sm font-medium">
                             {(employee?.disabled === true ? 'YES' : 'NO') ||

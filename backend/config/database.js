@@ -10,7 +10,7 @@ export const mongoConnect = async () => {
     await mongoose.connect(process.env.MONGO_DB_DATABASE_URL);
     console.log(
       chalk.bold.italic.bgHex("#6495ED")(
-        "Mongo Database Connection Successful                                                                             "
+        "Mongo Database Connection Successful"
       )
     );
   } catch (error) {

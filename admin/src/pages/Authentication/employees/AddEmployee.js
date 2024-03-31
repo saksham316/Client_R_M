@@ -1,11 +1,100 @@
+// ------------------------------------------------Imports----------------------------------------------
+import { useEffect, useRef, useState } from 'react';
 import Breadcrumb from '../../../components/Breadcrumb';
+import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { addNewEmployee } from '../../../features/actions/auth/employeeActions';
+import { confirmAlert } from 'react-confirm-alert';
+import { useDispatch, useSelector } from 'react-redux';
+import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
+import { resetEmployeeStatus } from '../../../features/slices/auth/employeeSlice';
+// ------------------------------------------------------------------------------------------------------
 
 const AddEmployee = () => {
+  // -----------------------------------------------States------------------------------------------------
+  const roleOptions = [
+    { value: '1', label: 'Admin' },
+    { value: '2', label: 'Employee' },
+  ];
+
+  const subRoleOptions = [
+    { value: '0', label: 'Coder Manager' },
+    { value: '1', label: 'Note Taker Manager' },
+    { value: '2', label: 'QA Manager' },
+    { value: '3', label: 'Coder' },
+    { value: '4', label: 'Note Taker' },
+    { value: '5', label: 'QA' },
+  ];
+
+  const [role, setRole] = useState();
+  const [subRole, setSubRole] = useState();
+  // -----------------------------------------------------------------------------------------------------
+  // -----------------------------------------------Hooks------------------------------------------------
+  const submitBtnRef = useRef();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
+
+  const { isUserCreated } = useSelector((state) => state?.employees);
+  // -----------------------------------------------------------------------------------------------------
+  // -----------------------------------------------Functions------------------------------------------------
+  // submitHandler -- handler to submit the create employee form
+  const submitHandler = (data) => {
+    try {
+      confirmAlert({
+        title: 'Create Employee Confirmation!',
+        message:
+          'Are you sure you want to Create the Employee with the mentioned details?',
+        buttons: [
+          {
+            label: 'Yes',
+            onClick: async () => {
+              let payload = {};
+              if (subRole) {
+                payload = { ...data, role, subRole };
+              } else {
+                payload = { ...data, role };
+              }
+              let formData = new FormData();
+              formData.append('payload', JSON.stringify(payload));
+              formData.append('avatar', '');
+              dispatch(addNewEmployee(formData));
+            },
+          },
+          {
+            label: 'No',
+            onClick: () => {},
+          },
+        ],
+      });
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  // -----------------------------------------------useEffect--------------------------------------------
+  useEffect(() => {
+    if (isUserCreated) {
+      navigate('/employees/viewEmployees');
+      dispatch(resetEmployeeStatus(false));
+    }
+  }, [isUserCreated]);
+  // -----------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------------
   return (
     <>
       <Breadcrumb pageName="Add Employee" />
 
-      <div className="grid grid-cols-1 gap-9 sm:grid-cols-2">
+      <form
+        onSubmit={handleSubmit(submitHandler)}
+        className="grid grid-cols-1 gap-9 sm:grid-cols-2"
+      >
         <div className="flex flex-col gap-9">
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
@@ -13,7 +102,7 @@ const AddEmployee = () => {
                 Basic Details
               </h3>
             </div>
-            <form action="#">
+            <div>
               <div className="p-6.5">
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                   <div className="w-full xl:w-1/2">
@@ -21,10 +110,22 @@ const AddEmployee = () => {
                       First name
                     </label>
                     <input
+                      {...register('firstName', {
+                        required: {
+                          value: true,
+                          message: 'First Name is a required field',
+                        },
+                      })}
                       type="text"
                       placeholder="Enter your first name"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
+                    {errors.firstName &&
+                      errors.firstName.type === 'required' && (
+                        <p className={`w-full text-red-600`}>
+                          First Name is a required field
+                        </p>
+                      )}
                   </div>
 
                   <div className="w-full xl:w-1/2">
@@ -32,10 +133,21 @@ const AddEmployee = () => {
                       Last name
                     </label>
                     <input
+                      {...register('lastName', {
+                        required: {
+                          value: true,
+                          message: 'Last Name is a required field',
+                        },
+                      })}
                       type="text"
                       placeholder="Enter your last name"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
+                    {errors.lastName && errors.lastName.type === 'required' && (
+                      <p className={`w-full text-red-600`}>
+                        Last Name is a required field
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -44,11 +156,53 @@ const AddEmployee = () => {
                     Email Address <span className="text-meta-1">*</span>
                   </label>
                   <input
+                    {...register('email', {
+                      required: {
+                        value: true,
+                        message: 'Email is a required field',
+                      },
+                    })}
                     type="email"
                     placeholder="Enter your email address"
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
+                  {errors.email && errors.email.type === 'required' && (
+                    <p className={`w-full text-red-600`}>
+                      Email is a required field
+                    </p>
+                  )}
                 </div>
+                <div className="mb-4.5">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Role <span className="text-meta-1">*</span>
+                  </label>
+                  <Select
+                    placeholder="Select Role"
+                    options={roleOptions}
+                    onChange={(role) => {
+                      if (role.value == 1) {
+                        setSubRole('');
+                        setRole(role.value);
+                      } else {
+                        setRole(role.value);
+                      }
+                    }}
+                  />
+                </div>
+                {role && role == 2 && (
+                  <div className="mb-4.5">
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      Sub Role <span className="text-meta-1">*</span>
+                    </label>
+                    <Select
+                      placeholder="Select Sub Role"
+                      options={subRoleOptions}
+                      onChange={(role) => {
+                        setSubRole(role.value);
+                      }}
+                    />
+                  </div>
+                )}
 
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                   <div className="w-full xl:w-1/2">
@@ -56,10 +210,21 @@ const AddEmployee = () => {
                       Employee's Username
                     </label>
                     <input
+                      {...register('userName', {
+                        required: {
+                          value: true,
+                          message: 'User Name is a required field',
+                        },
+                      })}
                       type="text"
-                      placeholder="Enter your first name"
+                      placeholder="Enter user name"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
+                    {errors.userName && errors.userName.type === 'required' && (
+                      <p className={`w-full text-red-600`}>
+                        User Name is a required field
+                      </p>
+                    )}
                   </div>
 
                   <div className="w-full xl:w-1/2">
@@ -67,10 +232,21 @@ const AddEmployee = () => {
                       Temporary Login Password
                     </label>
                     <input
-                      type="text"
-                      placeholder="Enter your last name"
+                      {...register('password', {
+                        required: {
+                          value: true,
+                          message: 'Password is a required field',
+                        },
+                      })}
+                      type="password"
+                      placeholder="Enter password"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
+                    {errors.password && errors.password.type === 'required' && (
+                      <p className={`w-full text-red-600`}>
+                        Password is a required field
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -79,10 +255,22 @@ const AddEmployee = () => {
                     Mobile Number <span className="text-meta-1">*</span>
                   </label>
                   <input
-                    type="email"
-                    placeholder="Enter your email address"
+                    {...register('mobileNumber', {
+                      required: {
+                        value: true,
+                        message: 'Mobile Number is a required field',
+                      },
+                    })}
+                    type="number"
+                    placeholder="Enter your mobile number"
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
+                  {errors.mobileNumber &&
+                    errors.mobileNumber.type === 'required' && (
+                      <p className={`w-full text-red-600`}>
+                        Mobile Number is a required field
+                      </p>
+                    )}
                 </div>
 
                 <div className="mb-6">
@@ -143,15 +331,118 @@ const AddEmployee = () => {
                   Send Message
                 </button> */}
               </div>
-            </form>
+            </div>
           </div>
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
+              <h3 className="font-medium text-black dark:text-white">
+                Identification's Details
+              </h3>
+            </div>
+            <div>
+              <div className="p-6.5">
+                <div className="mb-4.5">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Aadhaar Card Number
+                  </label>
+                  <input
+                    {...register('aadhaarNumber', {
+                      required: {
+                        value: true,
+                        message: 'Aadhaar Number is a required field',
+                      },
+                    })}
+                    type="text"
+                    placeholder="Enter your aadhaar number"
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  />
+                  {errors.aadhaarNumber &&
+                    errors.aadhaarNumber.type === 'required' && (
+                      <p className={`w-full text-red-600`}>
+                        Aadhaar Number is a required field
+                      </p>
+                    )}
+                </div>
+
+                <div className="mb-4.5">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    PAN Card Number
+                  </label>
+                  <input
+                    {...register('panNumber', {
+                      required: {
+                        value: true,
+                        message: 'PAN Number is a required field',
+                      },
+                    })}
+                    type="text"
+                    placeholder="Enter your PAN address"
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  />
+                  {errors.panNumber && errors.panNumber.type === 'required' && (
+                    <p className={`w-full text-red-600`}>
+                      PAN Number is a required field
+                    </p>
+                  )}
+                </div>
+
+                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                  <div className="w-full xl:w-1/2">
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      UAN Number
+                    </label>
+                    <input
+                      {...register('uanNumber', {
+                        required: {
+                          value: true,
+                          message: 'UAN Number is a required field',
+                        },
+                      })}
+                      type="text"
+                      placeholder="Enter your UAN Number"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    />
+                    {errors.uanNumber &&
+                      errors.uanNumber.type === 'required' && (
+                        <p className={`w-full text-red-600`}>
+                          UAN Number is a required field
+                        </p>
+                      )}
+                  </div>
+
+                  <div className="w-full xl:w-1/2">
+                    <label className="mb-2.5 block text-black dark:text-white">
+                      ESI Number
+                    </label>
+                    <input
+                      {...register('esiNumber', {
+                        required: {
+                          value: true,
+                          message: 'ESI Number is a required field',
+                        },
+                      })}
+                      type="text"
+                      placeholder="Enter your last name"
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    />
+                    {errors.esiNumber &&
+                      errors.esiNumber.type === 'required' && (
+                        <p className={`w-full text-red-600`}>
+                          ESI Number is a required field
+                        </p>
+                      )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
               <h3 className="font-medium text-black dark:text-white">
                 Family Details
               </h3>
             </div>
-            <form action="#">
+            <div action="#">
               <div className="p-6.5">
                 <div className="mb-4.5">
                   <label className="mb-2.5 block text-black dark:text-white">
@@ -199,8 +490,8 @@ const AddEmployee = () => {
                   </div>
                 </div>
               </div>
-            </form>
-          </div>
+            </div>
+          </div> */}
         </div>
 
         <div className="flex flex-col gap-9">
@@ -210,7 +501,7 @@ const AddEmployee = () => {
                 Department and Manager's Details
               </h3>
             </div>
-            <form action="#">
+            <div>
               <div className="p-6.5">
                 <div className="mb-4.5">
                   <label className="mb-2.5 block text-black dark:text-white">
@@ -265,7 +556,7 @@ const AddEmployee = () => {
                   />
                 </div>
               </div>
-            </form>
+            </div>
           </div>
 
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -274,28 +565,72 @@ const AddEmployee = () => {
                 Bank's Details
               </h3>
             </div>
-            <form action="#">
+            <div>
               <div className="p-6.5">
                 <div className="mb-4.5">
                   <label className="mb-2.5 block text-black dark:text-white">
                     Bank's Name
                   </label>
                   <input
+                    {...register('bankName', {
+                      required: {
+                        value: true,
+                        message: "Bank's Name is a required field",
+                      },
+                    })}
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder="Enter Bank's name"
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
+                  {errors.bankName && errors.bankName.type === 'required' && (
+                    <p className={`w-full text-red-600`}>
+                      Bank's Name is a required field
+                    </p>
+                  )}
                 </div>
-
+                <div className="mb-4.5">
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Account Holder's Name
+                  </label>
+                  <input
+                    {...register('accountHolderName', {
+                      required: {
+                        value: true,
+                        message: "Account Holder's Name is a required field",
+                      },
+                    })}
+                    type="text"
+                    placeholder="Enter Account Holder Name"
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  />
+                  {errors.accountHolderName &&
+                    errors.accountHolderName.type === 'required' && (
+                      <p className={`w-full text-red-600`}>
+                        Account Holder's Name is a required field
+                      </p>
+                    )}
+                </div>
                 <div className="mb-4.5">
                   <label className="mb-2.5 block text-black dark:text-white">
                     Account Number
                   </label>
                   <input
+                    {...register('accountNumber', {
+                      required: {
+                        value: true,
+                        message: 'Account Number is a required field',
+                      },
+                    })}
                     type="text"
                     placeholder="Enter your email address"
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   />
+                  {errors.accountNumber &&
+                    errors.accountNumber.type === 'required' && (
+                      <p className={`w-full text-red-600`}>
+                        Account Number is a required field
+                      </p>
+                    )}
                 </div>
 
                 <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
@@ -304,10 +639,21 @@ const AddEmployee = () => {
                       IFSC Code
                     </label>
                     <input
+                      {...register('ifsc', {
+                        required: {
+                          value: true,
+                          message: 'IFSC code is a required field',
+                        },
+                      })}
                       type="text"
-                      placeholder="Enter your first name"
+                      placeholder="Enter your IFSC code"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
+                    {errors.ifsc && errors.ifsc.type === 'required' && (
+                      <p className={`w-full text-red-600`}>
+                        IFSC Code is a required field
+                      </p>
+                    )}
                   </div>
 
                   <div className="w-full xl:w-1/2">
@@ -315,84 +661,39 @@ const AddEmployee = () => {
                       Branch Code
                     </label>
                     <input
+                      {...register('branchCode', {
+                        required: {
+                          value: true,
+                          message: 'Branch code is a required field',
+                        },
+                      })}
                       type="text"
-                      placeholder="Enter your last name"
+                      placeholder="Enter your Branch Code"
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     />
+                    {errors.branchCode &&
+                      errors.branchCode.type === 'required' && (
+                        <p className={`w-full text-red-600`}>
+                          Branch Code is a required field
+                        </p>
+                      )}
                   </div>
                 </div>
-
-                <div className="mb-4.5">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Name in Bank Account
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter password"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  />
-                </div>
               </div>
-            </form>
-          </div>
-
-          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-            <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-              <h3 className="font-medium text-black dark:text-white">
-                Identification's Details
-              </h3>
             </div>
-            <form action="#">
-              <div className="p-6.5">
-                <div className="mb-4.5">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    Aadhaar Card Number
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter your full name"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  />
-                </div>
-
-                <div className="mb-4.5">
-                  <label className="mb-2.5 block text-black dark:text-white">
-                    PAN Card Number
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter your email address"
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  />
-                </div>
-
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
-                  <div className="w-full xl:w-1/2">
-                    <label className="mb-2.5 block text-black dark:text-white">
-                      UAN Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter your first name"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    />
-                  </div>
-
-                  <div className="w-full xl:w-1/2">
-                    <label className="mb-2.5 block text-black dark:text-white">
-                      ESI Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter your last name"
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    />
-                  </div>
-                </div>
-              </div>
-            </form>
           </div>
         </div>
+        <button type="submit" className="none" ref={submitBtnRef}></button>
+      </form>
+      <div className="submitBtn flex justify-center mt-1">
+        <button
+          onClick={() => {
+            submitBtnRef.current.click();
+          }}
+          className="border border-gray-400 p-4 rounded-full font-bold bg-blue-950 text-white text-xl"
+        >
+          Create Employee
+        </button>
       </div>
     </>
   );

@@ -5,6 +5,7 @@ import {
   deleteEmployee,
   fetchCompleteEmployeesList,
   fetchIdSpecificEmployeeDetails,
+  getAllCoders,
   updateEmployeeDetails,
 } from '../../actions/auth/employeeActions';
 
@@ -16,6 +17,8 @@ const initialState = {
   isSuccess: false,
   errorMessage: '',
   employeesList: [],
+  isUserCreated: false,
+  coders: [],
 };
 
 // -------------------------------------- Slices------------------------------------------------
@@ -23,7 +26,9 @@ const employeeSlice = createSlice({
   name: 'employees',
   initialState,
   reducers: {
-    clearReduxStoreData: (state) => {},
+    resetEmployeeStatus: (state, action) => {
+      state.isUserCreated = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -80,18 +85,23 @@ const employeeSlice = createSlice({
         state.isLoading = true;
         state.isSuccess = false;
         state.errorMessage = '';
+        state.isUserCreated = false;
       })
       .addCase(addNewEmployee.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.errorMessage = '';
         state.employeesList = [action.payload];
+        state.isUserCreated = true;
+
         toast.success('Employee Added successfully');
       })
       .addCase(addNewEmployee.rejected, (state, action) => {
         state.isLoading = false;
         state.isSuccess = false;
         state.errorMessage = action.payload;
+        state.isUserCreated = false;
+
         toast.error(
           state.errorMessage
             ? state.errorMessage
@@ -146,10 +156,29 @@ const employeeSlice = createSlice({
             ? state.errorMessage
             : 'Sorry, something went wrong. Please try again later may be some Internal server error'
         );
+      })
+      // getAllCoders lifecycle actions
+      .addCase(getAllCoders.pending, (state, action) => {
+        state.isLoading = true;
+        state.errorMessage = '';
+      })
+      .addCase(getAllCoders.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.coders = action.payload;
+        state.errorMessage = '';
+      })
+      .addCase(getAllCoders.rejected, (state, action) => {
+        state.isLoading = false;
+        state.errorMessage = action.payload;
+        toast.error(
+          state.errorMessage
+            ? state.errorMessage
+            : 'Sorry, something went wrong. Please try again later may be some Internal server error'
+        );
       });
   },
 });
 
 // ===========================================Exports==================================================
 export default employeeSlice.reducer;
-export const { clearReduxStoreData } = employeeSlice.actions;
+export const { resetEmployeeStatus } = employeeSlice.actions;

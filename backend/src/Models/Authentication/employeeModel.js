@@ -1,15 +1,26 @@
 // ----------------------------------------------Imports------------------------------------------
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import { coderTaskModel } from "../Project/Task/Coder/coderTaskModel.js";
+import { noteTakerTaskModel } from "../Project/Task/NoteTaker/noteTakerTaskModel.js";
 // ------------------------------------------------------------------------------------------------
 const { Schema } = mongoose;
 
 const employeeSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
       type: String,
       required: true,
       trim: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
     },
     userName: {
       type: String,
@@ -22,66 +33,9 @@ const employeeSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is a required field"],
     },
-    email: {
-      type: String,
-      required: true,
-    },
-    dob: {
-      type: Date,
-      required: true,
-    },
-    phone: {
+    mobileNumber: {
       type: Number,
       required: true,
-    },
-    doj: {
-      type: Date,
-      required: true,
-    },
-    ctc: {
-      required: true,
-      type: Number,
-    },
-    processManager: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    reportingManager: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    avatar: {
-      type: String,
-      default: "https://i.ibb.co/QN7GHWC/default-Avatar.jpg",
-    },
-    isAllDocumentsVerified: {
-      required: true,
-      type: Boolean,
-      default: false,
-    },
-    department: {
-      required: true,
-      type: String,
-      trim: true,
-    },
-
-    employeeCode: {
-      required: true,
-      type: String,
-    },
-    bank: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    ifsc: {
-      type: String,
-    },
-    accountNumber: {
-      type: Number,
-      //   required: true,
     },
     residentialAddress: {
       country: String,
@@ -93,21 +47,138 @@ const employeeSchema = new mongoose.Schema(
       state: String,
       city: String,
     },
-
-    gender: {},
-    role: {
-      type: Schema.Types.ObjectId,
-      ref: "role",
+    accountHolderName: {
+      type: String,
     },
-    permissions: {
-      type: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: "permission",
-        },
-      ],
+    bankName: {
+      type: String,
       required: true,
+      trim: true,
     },
+    accountNumber: {
+      type: Number,
+      //   required: true,
+    },
+    ifsc: {
+      type: String,
+    },
+    branchCode: {
+      type: String,
+    },
+    aadhaarNumber: {
+      type: String,
+    },
+    panNumber: {
+      type: String,
+    },
+    uanNumber: {
+      type: String,
+    },
+    esiNumber: {
+      type: String,
+    },
+    role: {
+      type: String,
+      enum: ["0", "1", "2"],
+      default: "2",
+    },
+    subRole: {
+      type: String,
+      enum: ["0", "1", "2", "3", "4", "5"],
+    },
+    doj: {
+      type: Date,
+      // required: true,
+      default: Date.now(),
+    },
+    assignedTasks: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: function () {
+          if (this.role === "2") {
+            if (this.subRole === "3" || this.subRole === "0") {
+              return "coderTask";
+            } else if (this.subRole === "4" || this.subRole === "1") {
+              return "noteTakerTask";
+            } else {
+              return "";
+            }
+          } else {
+            return "";
+          }
+        },
+      },
+    ],
+    bucket: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: function () {
+          if (this.role === "2") {
+            if (this.subRole === "3" || this.subRole === "0") {
+              return "coderTask";
+            } else if (this.subRole === "4" || this.subRole === "1") {
+              return "noteTakerTask";
+            } else {
+              return "";
+            }
+          } else {
+            return "";
+          }
+        },
+      },
+    ],
+
+    // --------------------------
+    fatherName: {
+      type: String,
+    },
+    motherName: {
+      type: String,
+    },
+    dob: {
+      type: Date,
+      // required: true,
+    },
+
+    ctc: {
+      // required: true,
+      type: Number,
+    },
+    processManager: {
+      type: String,
+      // required: true,
+      trim: true,
+    },
+    reportingManager: {
+      type: String,
+      // required: true,
+      trim: true,
+    },
+    avatar: {
+      type: String,
+      default: "https://i.ibb.co/QN7GHWC/default-Avatar.jpg",
+    },
+    isAllDocumentsVerified: {
+      // required: true,
+      type: Boolean,
+      default: false,
+    },
+    department: {
+      // required: true,
+      type: String,
+      trim: true,
+    },
+
+    employeeCode: {
+      // required: true,
+      type: String,
+    },
+
+    gender: {
+      type: String,
+      enum: ["MALE", "FEMALE", "OTHER"],
+    },
+
     disabled: {
       type: Boolean,
       default: false,

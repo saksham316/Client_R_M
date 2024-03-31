@@ -4,6 +4,12 @@ import { permissionModel } from "../../Models/Authentication/permissionModel.js"
 import { roleModel } from "../../Models/Authentication/roleModel.js";
 import bcrypt from "bcrypt";
 import { urlProvider } from "../../configs/GoogleConsoleConfigs/generateUrl.js";
+import { pick } from "lodash-es";
+import {
+  availableRoles,
+  roleChecker,
+  subRoleChecker,
+} from "../../../utils/index.js";
 
 // -------------------------------------------------------------------------------------------------------------
 
@@ -20,7 +26,30 @@ export const createEmployee = async (req, res) => {
         message: "Payload is required",
       });
     }
-    let newPayload = { ...payload };
+
+    const sanitizedPayload = pick(payload, [
+      "firstName",
+      "lastName",
+      "email",
+      "userName",
+      "password",
+      "mobileNumber",
+      "residentialAddress",
+      "permanentAddress",
+      "accountHolderName",
+      "bankName",
+      "accountNumber",
+      "ifsc",
+      "branchCode",
+      "aadhaarNumber",
+      "panNumber",
+      "uanNumber",
+      "esiNumber",
+      "role",
+      "subRole",
+    ]);
+
+    let newPayload = { ...sanitizedPayload };
 
     if (req?.file) {
       const avatarName = `${Math.ceil(Math.random() * 1000000000)}${
@@ -175,24 +204,31 @@ export const getAllEmployees = async (req, res) => {
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 50;
 
-    const employees = await employeeModel
+    let employees = await employeeModel
       .find()
-      .populate({
-        path: "role",
-        model: roleModel,
-        populate: {
-          path: "permissions",
-          model: permissionModel,
-        },
-      })
       .limit(limit)
       .skip(limit * (page - 1));
+
+    let employeesData = JSON.parse(JSON.stringify(employees));
+
+    employeesData = employeesData?.map((emp) => {
+      let employee = {};
+      if (emp.subRole >= 0) {
+        let role = roleChecker(emp.role);
+        let subRole = subRoleChecker(emp.subRole);
+        employee = { ...emp, role, subRole };
+      } else {
+        let role = roleChecker(emp.role);
+        employee = { ...emp, role };
+      }
+      return employee;
+    });
 
     return res.status(200).json({
       success: true,
       message: "Employees Found Successfully",
       data: {
-        employees,
+        employees: employeesData,
         page,
         limit,
       },
@@ -241,4 +277,22 @@ export const getIndividualEmployee = async (req, res) => {
   }
 };
 
+// @desc - getting specific user data
+// @route - GET /admin/employee/coder
+// @access - private
+export const getAllCoders = async (req, res) => {
+  try {
+    const coders = await employeeModel.find({ subRole: "3" });
 
+    return res.status(200).json({
+      success: true,
+      message: "Coders Found Successfully",
+      data: { coders },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Internal Server Error! ${error.message}`,
+    });
+  }
+};
