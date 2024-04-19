@@ -122,4 +122,22 @@ export const getAllCoders = createAsyncThunk(
     }
   }
 );
+
+// getAllNoteTakers -- action to fetch all the noteTakers
+export const getAllNoteTakers = createAsyncThunk(
+  'employees/getAllNoteTakers',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`admin/employee/noteTaker`, payload, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
 // ===================================================== THE END ===========================================

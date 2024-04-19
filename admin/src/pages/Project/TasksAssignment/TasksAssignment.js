@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { confirmAlert } from 'react-confirm-alert';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -10,9 +10,18 @@ import {
   assignCoderTasks,
   getAllCoderTasks,
 } from '../../../features/actions/project/task/coder/coderActions';
-import { getAllCoders } from '../../../features/actions/auth/employeeActions';
+import {
+  getAllCoders,
+  getAllNoteTakers,
+} from '../../../features/actions/auth/employeeActions';
 import { resetCoderTaskStatus } from '../../../features/slices/project/task/coder/coderSlice';
 import { getBucketData } from '../../../features/actions/project/task/bucket/bucketActions';
+import {
+  assignNoteTakerTasks,
+  getAllNoteTakerTasks,
+} from '../../../features/actions/project/task/noteTaker/noteTakerActions';
+import { useForm } from 'react-hook-form';
+import { resetNoteTakerTaskStatus } from '../../../features/slices/project/task/noteTaker/noteTakerSlice';
 
 // -----------------------------------------------------------------------------------------------------------------
 
@@ -28,12 +37,17 @@ const TasksAssignment = () => {
   };
 
   const [coderTasksData, setCoderTasksData] = useState([]);
+  const [noteTakerTasksData, setNoteTakerTasksData] = useState([]);
   const [codersData, setCodersData] = useState([]);
+  const [noteTakersData, setNoteTakersData] = useState([]);
   const [codersSelectOption, setCodersSelectOption] = useState([]);
+  const [noteTakersSelectOption, setNoteTakersSelectOption] = useState([]);
   const [selectedCoder, setSelectedCoder] = useState('');
+  const [selectedNoteTaker, setSelectedNoteTaker] = useState('');
   const [checkAllBoxes, setCheckAllBoxes] = useState(false);
   const [selectedIndexes, setSelectedIndexes] = useState('');
   const [selectedTasks, setSelectedTasks] = useState([]);
+  const [selectedNoteTakerTasks, setSelectedNoteTakerTasks] = useState({});
 
   const status1Options = [
     { value: 'SUBMITTED_TO_CASE_MANAGER', label: 'Submitted to Case Manager' },
@@ -46,11 +60,18 @@ const TasksAssignment = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const { register, resetField, reset } = useForm();
+
   const { isCoderTaskLoading, isCoderTasksAssigned, coderTasks } = useSelector(
     (state) => state?.coderTask
   );
 
-  const { coders } = useSelector((state) => state.employees);
+  const { isNoteTakerTaskLoading, isNoteTakerTasksAssigned, noteTakerTasks } =
+    useSelector((state) => state?.noteTakerTask);
+
+  const { loggedInUserData } = useSelector((state) => state?.authentication);
+
+  const { coders, noteTakers } = useSelector((state) => state.employees);
   // -----------------------------------------------------------------------------------------------------------
 
   // ----------------------------------------------Functions----------------------------------------------------
@@ -60,9 +81,18 @@ const TasksAssignment = () => {
     dispatch(getAllCoderTasks());
   };
 
+  // fetchNoteTakerTasks
+  const fetchNoteTakerTasks = () => {
+    dispatch(getAllNoteTakerTasks());
+  };
+
   // fetchCoders
   const fetchCoders = () => {
     dispatch(getAllCoders());
+  };
+  // fetchNoteTakers
+  const fetchNoteTakers = () => {
+    dispatch(getAllNoteTakers());
   };
 
   // fetchBucketData
@@ -73,7 +103,24 @@ const TasksAssignment = () => {
   // selectionHandler -- handler to set the selected coder
   const selectionHandler = (e) => {
     try {
-      setSelectedCoder(e.value);
+      if (
+        loggedInUserData?.data?.role === '0' ||
+        loggedInUserData?.data?.role === '1'
+      ) {
+        setSelectedCoder(e.value);
+      } else if (
+        loggedInUserData?.data?.role === '2' &&
+        loggedInUserData?.data?.subRole === '0'
+      ) {
+        setSelectedCoder(e.value);
+      } else if (
+        loggedInUserData?.data?.role === '2' &&
+        loggedInUserData?.data?.subRole === '1'
+      ) {
+        setSelectedNoteTaker(e.value);
+      } else {
+        toast.error('Please select a user for assignment of the task');
+      }
     } catch (error) {
       toast.error(error.message);
     }
@@ -106,22 +153,88 @@ const TasksAssignment = () => {
   // taskAssignmentHandler -- handler to assign the tasks to the particular coder/notetaker
   const taskAssignmentHandler = () => {
     try {
-      if (selectedCoder) {
-        if (selectedTasks.length > 0) {
-          dispatch(
-            assignCoderTasks({
-              coderId: selectedCoder,
-              payload: { tasks: selectedTasks },
-            })
-          );
+      if (
+        loggedInUserData?.data?.role === '0' ||
+        loggedInUserData?.data?.role === '1'
+      ) {
+        if (selectedCoder) {
+          if (selectedTasks.length > 0) {
+            dispatch(
+              assignCoderTasks({
+                coderId: selectedCoder,
+                payload: { tasks: selectedTasks },
+              })
+            );
+          } else {
+            toast.error('Please select the task/tasks first');
+          }
         } else {
-          toast.error('Please select the task/tasks first');
+          toast.error('Please select a user for assignment of the task');
         }
-      } else {
-        toast.error('Please select a user for assignment of the task');
+      } else if (
+        loggedInUserData?.data?.role === '2' &&
+        loggedInUserData?.data?.subRole === '0'
+      ) {
+        if (selectedCoder) {
+          if (selectedTasks.length > 0) {
+            dispatch(
+              assignCoderTasks({
+                coderId: selectedCoder,
+                payload: { tasks: selectedTasks },
+              })
+            );
+          } else {
+            toast.error('Please select the task/tasks first');
+          }
+        } else {
+          toast.error('Please select a user for assignment of the task');
+        }
+      } else if (
+        loggedInUserData?.data?.role === '2' &&
+        loggedInUserData?.data?.subRole === '1'
+      ) {
+        if (selectedNoteTaker) {
+          if (
+            selectedNoteTakerTasks &&
+            Object.keys(selectedNoteTakerTasks).length > 0
+          ) {
+            dispatch(
+              assignNoteTakerTasks({
+                noteTakerId: selectedNoteTaker,
+                payload: { tasks: selectedNoteTakerTasks },
+              })
+            );
+          } else {
+            toast.error('Please select the task/tasks first');
+          }
+        } else {
+          toast.error('Please select a user for assignment of the task');
+        }
       }
     } catch (error) {
       return toast.error(error.message);
+    }
+  };
+
+  // taskCapacityHandler -- handler to handle the input of the task to be assigned
+  const taskCapacityHandler = (e, index, currentCapacity, noteTakerTaskId) => {
+    let { value } = e.target;
+    let obj = JSON.parse(JSON.stringify(selectedNoteTakerTasks));
+    if (parseInt(value) > parseInt(currentCapacity)) {
+      delete obj[noteTakerTaskId];
+      setSelectedNoteTakerTasks(obj);
+      resetField(`taskCapacity${index}`);
+      toast.error('Capacity should not exceed the current capacity');
+    } else if (parseInt(value) < 0) {
+      delete obj[noteTakerTaskId];
+      setSelectedNoteTakerTasks(obj);
+      resetField(`taskCapacity${index}`);
+      toast.error('Capacity should not subceed 0');
+    } else {
+      if (parseInt(value) > 0) {
+        obj[noteTakerTaskId] = value;
+        setSelectedNoteTakerTasks(obj);
+      }
     }
   };
 
@@ -131,6 +244,9 @@ const TasksAssignment = () => {
   useEffect(() => {
     if (coderTasks?.data?.coderTasks) {
       setCoderTasksData(coderTasks?.data?.coderTasks);
+    }
+    if (noteTakerTasks?.data?.noteTakerTasks) {
+      setNoteTakerTasksData(noteTakerTasks?.data?.noteTakerTasks);
     }
 
     if (coders?.data?.coders?.length > 0) {
@@ -144,7 +260,19 @@ const TasksAssignment = () => {
       });
       setCodersSelectOption(arr);
     }
-  }, [coderTasks, coders]);
+
+    if (noteTakers?.data?.noteTakers?.length > 0) {
+      setNoteTakersData(noteTakers?.data?.noteTakers);
+      let arr = [];
+      noteTakers?.data?.noteTakers.forEach((noteTaker) => {
+        arr.push({
+          value: noteTaker?._id,
+          label: `${noteTaker.firstName} ${noteTaker.lastName}`,
+        });
+      });
+      setNoteTakersSelectOption(arr);
+    }
+  }, [coderTasks, coders, noteTakerTasks, noteTakers]);
 
   useEffect(() => {
     if (isCoderTasksAssigned) {
@@ -152,16 +280,61 @@ const TasksAssignment = () => {
       fetchBucketData();
       dispatch(resetCoderTaskStatus(false));
     }
-  }, [isCoderTasksAssigned]);
+
+    if (isNoteTakerTasksAssigned) {
+      fetchNoteTakerTasks();
+      // fetchBucketData();
+      dispatch(resetNoteTakerTaskStatus(false));
+      reset();
+      setSelectedNoteTakerTasks({});
+    }
+  }, [isCoderTasksAssigned, isNoteTakerTasksAssigned]);
 
   useEffect(() => {
-    console.log('these are the selected tasks', selectedTasks);
-  }, [selectedTasks]);
-
-  useEffect(() => {
-    fetchCoderTasks();
-    fetchCoders();
+    if (
+      loggedInUserData?.data?.role === '0' ||
+      loggedInUserData?.data?.role === '1'
+    ) {
+      fetchCoderTasks();
+      fetchCoders();
+    } else if (
+      loggedInUserData?.data?.role === '2' &&
+      loggedInUserData?.data?.subRole === '0'
+    ) {
+      fetchCoderTasks();
+      fetchCoders();
+    } else if (
+      loggedInUserData?.data?.role === '2' &&
+      loggedInUserData?.data?.subRole === '1'
+    ) {
+      fetchNoteTakerTasks();
+      fetchNoteTakers();
+    }
   }, []);
+
+  useEffect(() => {
+    console.log(selectedNoteTakerTasks);
+  }, [selectedNoteTakerTasks]);
+  //------------------------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------------------------
+  const selectOptions = () => {
+    if (
+      loggedInUserData?.data?.role === '0' ||
+      loggedInUserData?.data?.role === '1'
+    ) {
+      return codersSelectOption;
+    } else if (
+      loggedInUserData?.data?.role === '2' &&
+      loggedInUserData?.data?.subRole === '0'
+    ) {
+      return codersSelectOption;
+    } else if (
+      loggedInUserData?.data?.role === '2' &&
+      loggedInUserData?.data?.subRole === '1'
+    ) {
+      return noteTakersSelectOption;
+    }
+  };
   //------------------------------------------------------------------------------------------------------------
 
   return (
@@ -182,7 +355,7 @@ const TasksAssignment = () => {
           <div className="employeesList w-[50%] flex justify-start gap-5">
             <Select
               className="w-[30%] "
-              options={codersSelectOption}
+              options={selectOptions()}
               onChange={selectionHandler}
             />
             <button
@@ -196,193 +369,195 @@ const TasksAssignment = () => {
         </div>
         <div className="mt-6 flex flex-col w-[100%]">
           <div className="relative w-[100%] shadow-lg sm:rounded-lg border overflow-x-auto">
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 ">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                  <th scope="col" className="p-4">
-                    <div className="flex items-center">
-                      <input
-                        id="checkbox-all-search"
-                        type="checkbox"
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            let arr = [];
-                            setCheckAllBoxes(true);
-                            setSelectedIndexes([]);
-                            coderTasksData.forEach((task) => {
-                              arr.push(task?._id);
-                            });
-                            setSelectedTasks(arr);
-                          } else {
-                            setCheckAllBoxes(false);
-                            setSelectedTasks([]);
-                          }
-                        }}
-                      />
-                      <label for="checkbox-all-search" className="sr-only">
-                        checkbox
-                      </label>
-                    </div>
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Task name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Patient First name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Patient Last name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Target Date
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    MRN Number
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Provider First
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Provider Last
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Status 1
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Insurance
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Priority
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 "
-                    style={styles.tableHeading}
-                  >
-                    Age of Record
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {isCoderTaskLoading ? (
-                  <ReactSkeletonLoading thCount={12} />
-                ) : (
-                  Array.isArray(coderTasksData) &&
-                  coderTasksData.length > 0 &&
-                  coderTasksData.map((coderTask, coderTaskIndex) => {
-                    return (
-                      <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <td className="w-4 p-4">
-                          <div className="flex items-center">
-                            <input
-                              id="checkbox-table-search-1"
-                              type="checkbox"
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                              onChange={(e) => {
-                                checkBoxChangeHandler(
-                                  e,
-                                  coderTaskIndex,
-                                  coderTask?._id
-                                );
-                              }}
-                              checked={
-                                (checkAllBoxes && true) ||
-                                selectedIndexes.includes(coderTaskIndex)
-                              }
-                              disabled={checkAllBoxes ? true : false}
+            {loggedInUserData?.data?.role === '2' &&
+            loggedInUserData?.data?.subRole === '0' ? (
+              <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 ">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                  <tr>
+                    <th scope="col" className="p-4">
+                      <div className="flex items-center">
+                        <input
+                          id="checkbox-all-search"
+                          type="checkbox"
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              let arr = [];
+                              setCheckAllBoxes(true);
+                              setSelectedIndexes([]);
+                              coderTasksData.forEach((task) => {
+                                arr.push(task?._id);
+                              });
+                              setSelectedTasks(arr);
+                            } else {
+                              setCheckAllBoxes(false);
+                              setSelectedTasks([]);
+                            }
+                          }}
+                        />
+                        <label for="checkbox-all-search" className="sr-only">
+                          checkbox
+                        </label>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Task name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Patient First name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Patient Last name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Target Date
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      MRN Number
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Provider First
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Provider Last
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Status 1
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Insurance
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Priority
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Age of Record
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {isCoderTaskLoading ? (
+                    <ReactSkeletonLoading thCount={12} />
+                  ) : (
+                    Array.isArray(coderTasksData) &&
+                    coderTasksData.length > 0 &&
+                    coderTasksData.map((coderTask, coderTaskIndex) => {
+                      return (
+                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                          <td className="w-4 p-4">
+                            <div className="flex items-center">
+                              <input
+                                id="checkbox-table-search-1"
+                                type="checkbox"
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                onChange={(e) => {
+                                  checkBoxChangeHandler(
+                                    e,
+                                    coderTaskIndex,
+                                    coderTask?._id
+                                  );
+                                }}
+                                checked={
+                                  (checkAllBoxes && true) ||
+                                  selectedIndexes.includes(coderTaskIndex)
+                                }
+                                disabled={checkAllBoxes ? true : false}
+                              />
+                              <label
+                                for="checkbox-table-search-1"
+                                className="sr-only"
+                              >
+                                checkbox
+                              </label>
+                            </div>
+                          </td>
+                          <th
+                            scope="row"
+                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                          >
+                            {coderTask?.taskName || 'N/A'}
+                          </th>
+                          <td className="px-6 py-4">
+                            {coderTask?.patientFirstName || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            {coderTask?.patientLastName || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            {coderTask?.targetDate || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            {coderTask?.mrnNumber || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            {coderTask?.providerFirst || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            {coderTask?.providerLast || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            <Select
+                              className="w-[100%] "
+                              options={status1Options}
+                              defaultValue={{ value: 'ss', label: 'label' }}
                             />
-                            <label
-                              for="checkbox-table-search-1"
-                              className="sr-only"
-                            >
-                              checkbox
-                            </label>
-                          </div>
-                        </td>
-                        <th
-                          scope="row"
-                          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                        >
-                          {coderTask?.taskName || 'N/A'}
-                        </th>
-                        <td className="px-6 py-4">
-                          {coderTask?.patientFirstName || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          {coderTask?.patientLastName || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          {coderTask?.targetDate || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          {coderTask?.mrnNumber || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          {coderTask?.providerFirst || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          {coderTask?.providerLast || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <Select
-                            className="w-[100%] "
-                            options={status1Options}
-                            defaultValue={{ value: 'ss', label: 'label' }}
-                          />
 
-                          {/* {coderTask?.status1 || 'N/A'} */}
-                        </td>
-                        <td className="px-6 py-4">
-                          {coderTask?.insurance || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          {coderTask?.priority || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          {`${coderTask?.ageOfRecord} days` || 'N/A'}
-                        </td>
-                        {/* <td className="flex items-center px-6 py-4">
+                            {/* {coderTask?.status1 || 'N/A'} */}
+                          </td>
+                          <td className="px-6 py-4">
+                            {coderTask?.insurance || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            {coderTask?.priority || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            {`${coderTask?.ageOfRecord} days` || 'N/A'}
+                          </td>
+                          {/* <td className="flex items-center px-6 py-4">
                     <a
                       href="#"
                       className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
@@ -396,12 +571,92 @@ const TasksAssignment = () => {
                       Remove
                     </a>
                   </td> */}
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            ) : loggedInUserData?.data?.role === '2' &&
+              loggedInUserData?.data?.subRole === '1' ? (
+              <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 ">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3"
+                      style={styles.tableHeading}
+                    >
+                      Task name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      Current Capacity
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 "
+                      style={styles.tableHeading}
+                    >
+                      No. of Tasks to be assigned
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {isNoteTakerTaskLoading ? (
+                    <ReactSkeletonLoading thCount={3} />
+                  ) : (
+                    Array.isArray(noteTakerTasksData) &&
+                    noteTakerTasksData.length > 0 &&
+                    noteTakerTasksData.map(
+                      (noteTakerTask, noteTakerTaskIndex) => {
+                        return (
+                          <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <th
+                              scope="row"
+                              className="px-6 py-4 text-center font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                            >
+                              {noteTakerTask?.taskName || 'N/A'}
+                            </th>
+                            <td className="px-6 py-4 text-center">
+                              {noteTakerTask?.currentCapacity || 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              {noteTakerTask?.taskName ? (
+                                <input
+                                  type="number"
+                                  className="border rounded-lg w-[50%] text-center p-2 font-bold text-lg"
+                                  {...register(
+                                    `taskCapacity${noteTakerTaskIndex}`,
+                                    {
+                                      onChange: (e) => {
+                                        taskCapacityHandler(
+                                          e,
+                                          noteTakerTaskIndex,
+                                          noteTakerTask?.currentCapacity,
+                                          noteTakerTask?._id
+                                        );
+                                      },
+                                    }
+                                  )}
+                                />
+                              ) : (
+                                'N/A'
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      }
+                    )
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              'Invalid User'
+            )}
           </div>
         </div>
       </section>

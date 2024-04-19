@@ -23,7 +23,7 @@ const initialState = {
 // -------------------------------------------------------------------------------------------------------------
 
 const coderTaskSlice = createSlice({
-  name: 'coder',
+  name: 'coderTask',
   initialState,
   reducers: {
     resetCoderTaskStatus: (state, action) => {

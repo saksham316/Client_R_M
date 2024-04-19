@@ -30,7 +30,7 @@ const DefaultLayout = () => {
           <HeaderNonAuthenticatedScreen />
           <Outlet />
         </div>
-      )}
+      )} 
     </div>
   );
 };

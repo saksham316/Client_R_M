@@ -5,17 +5,25 @@ import toast from 'react-hot-toast';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import TaskTrackerFieldTag from '../../../components/Tasks/TaskTrackerFieldTag/TaskTrackerFieldTag';
-import WorkFlow from '../../../components/Tasks/WorkFlow/WorkFlow';
-import Submissions from '../../../components/Tasks/Submissions/Submissions';
-import Hold from '../../../components/Tasks/Hold/Hold';
-import Communications from '../../../components/Tasks/Communications/Communications';
-import UnderQA from '../../../components/Tasks/UnderQA/UnderQA';
+import TaskTrackerFieldTag from '../../../components/Tasks/Coder/TaskTrackerFieldTag/TaskTrackerFieldTag';
+import WorkFlow from '../../../components/Tasks/Coder/WorkFlow/WorkFlow';
+import Submissions from '../../../components/Tasks/Coder/Submissions/Submissions';
+import Hold from '../../../components/Tasks/Coder/Hold/Hold';
+import Communications from '../../../components/Tasks/Coder/Communications/Communications';
+import UnderQA from '../../../components/Tasks/Coder/UnderQA/UnderQA';
+import WorkFlowNT from '../../../components/Tasks/NoteTaker/WorkFlowNT/WorkFlowNT';
 
 // -------------------------------------------------------------------------------------------------------------
 
 const Tasks = () => {
+  // -----------------------------------------------------------------------------------------------------------
+  const { loggedInUserData } = useSelector((state) => state?.authentication);
+  // -----------------------------------------------------------------------------------------------------------
+
   // ------------------------------------------------States-----------------------------------------------------
+
+  const role = loggedInUserData?.data?.role;
+  const subRole = loggedInUserData?.data?.subRole;
 
   const status1Options = [
     { value: 'SUBMITTED_TO_CASE_MANAGER', label: 'Submitted to Case Manager' },
@@ -23,23 +31,48 @@ const Tasks = () => {
     { value: 'REOPENED', label: 'Reopened' },
   ];
 
-  const taskTrackerFields = [
-    { title: 'Workflow', comp: <WorkFlow /> },
-    { title: 'Submissions', comp: <Submissions /> },
-    { title: 'Hold', comp: <Hold /> },
-    { title: 'Under QA', comp: <UnderQA /> },
-    { title: 'Communications', comp: <Communications /> },
-    { title: 'Others', comp: 'others' },
-  ];
+  const taskTrackerFields =
+    loggedInUserData?.data?.role === '2' &&
+    loggedInUserData?.data?.subRole === '3'
+      ? [
+          { title: 'Workflow', comp: <WorkFlow /> },
+          { title: 'Submissions', comp: <Submissions /> },
+          { title: 'Hold', comp: <Hold /> },
+          { title: 'Under QA', comp: <UnderQA /> },
+          { title: 'Communications', comp: <Communications /> },
+          { title: 'Others', comp: 'others' },
+        ]
+      : loggedInUserData?.data?.subRole === '4'
+      ? [
+          { title: 'Workflow', comp: <WorkFlowNT /> },
+          { title: 'Approvals', comp: <Submissions /> },
+          { title: 'Returned', comp: <Hold /> },
+          { title: 'Pending', comp: <UnderQA /> },
+          { title: 'Please QA', comp: <Communications /> },
+          { title: 'Communications', comp: 'others' },
+        ]
+      : [];
 
-  const taskTrackerComp = {
-    workflow: <WorkFlow status1Options={status1Options} />,
-    submissions: <Submissions status1Options={status1Options} />,
-    hold: <Hold status1Options={status1Options} />,
-    under_qa: <UnderQA status1Options={status1Options} />,
-    communications: <Communications />,
-    others: 'others',
-  };
+  const taskTrackerComp =
+    role === '2' && subRole === '3'
+      ? {
+          workflow: <WorkFlow status1Options={status1Options} />,
+          submissions: <Submissions status1Options={status1Options} />,
+          hold: <Hold status1Options={status1Options} />,
+          under_qa: <UnderQA status1Options={status1Options} />,
+          communications: <Communications />,
+          others: 'others',
+        }
+      : subRole === '4'
+      ? {
+          workflow: <WorkFlow status1Options={status1Options} />,
+          approvals: <Submissions status1Options={status1Options} />,
+          returned: <Hold status1Options={status1Options} />,
+          pending: <UnderQA status1Options={status1Options} />,
+          please_qa: <Communications />,
+          communications: 'comm',
+        }
+      : {};
 
   const [index, setIndex] = useState(0);
 

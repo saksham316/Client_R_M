@@ -296,3 +296,23 @@ export const getAllCoders = async (req, res) => {
     });
   }
 };
+
+// @desc - getting specific user data
+// @route - GET /admin/employee/noteTaker
+// @access - private
+export const getAllNoteTakers = async (req, res) => {
+  try {
+    const noteTakers = await employeeModel.find({ subRole: "4" });
+
+    return res.status(200).json({
+      success: true,
+      message: "Note Takers Found Successfully",
+      data: { noteTakers },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Internal Server Error! ${error.message}`,
+    });
+  }
+};

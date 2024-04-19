@@ -9,3 +9,4 @@ export const managerSubRoles = ['0', '1'];
 
 // employeeSubRoles - roles for the employees
 export const employeeSubRoles = ['3', '4'];
+
