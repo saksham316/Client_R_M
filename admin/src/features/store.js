@@ -10,6 +10,7 @@ import employeeReducer from './slices/auth/employeeSlice';
 import { coderTaskReducer } from './slices/project/task/coder/coderSlice';
 import { bucketReducer } from './slices/project/task/bucket/bucketSlice';
 import { noteTakerTaskReducer } from './slices/project/task/noteTaker/noteTakerSlice';
+import { qaTaskReducer } from './slices/project/task/qa/qaSlice';
 
 // ----------------------------------------------------------------------------------------
 
@@ -36,6 +37,7 @@ const reducer = combineReducers({
   employees: employeeReducer,
   coderTask: coderTaskReducer,
   noteTakerTask: noteTakerTaskReducer,
+  qaTask: qaTaskReducer,
   bucket: bucketReducer,
   // omitedPart: OmitReducer // not persisting this reducer
 });

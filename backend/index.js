@@ -59,6 +59,7 @@ import { adminDepartmentRouter } from "./src/Routes/Department/departmentRoutes.
 import { adminCoderTaskRouter } from "./src/Routes/Project/Task/Coder/coderTaskRoutes.js";
 import { adminTaskRouter } from "./src/Routes/Project/Task/taskRoutes.js";
 import { adminNoteTakerTaskRouter } from "./src/Routes/Project/Task/NoteTaker/noteTakerTaskRoutes.js";
+import { adminQATaskRouter } from "./src/Routes/Project/Task/QA/qaTaskRoutes.js";
 
 // versionOne -- used to append api/v1 to all the routes
 function versionOne(parameters) {
@@ -72,6 +73,7 @@ app.use(versionOne("admin/department"), adminDepartmentRouter);
 app.use(versionOne("admin/task"), adminTaskRouter);
 app.use(versionOne("admin/task/coder"), adminCoderTaskRouter);
 app.use(versionOne("admin/task/noteTaker"), adminNoteTakerTaskRouter);
+app.use(versionOne("admin/task/qa"), adminQATaskRouter);
 
 // Client Routes
 app.use(versionOne("client/auth"), clientAuthRouter);

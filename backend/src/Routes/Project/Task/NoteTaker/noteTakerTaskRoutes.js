@@ -5,6 +5,7 @@ import {
   assignNoteTakerTasks,
   createNoteTakerTask,
   getAllNoteTakerTasks,
+  updateNoteTakerTask,
 } from "../../../../Controllers/Project/Task/NoteTaker/noteTakerTaskController.js";
 // -------------------------------------------------------------------------------------------------------------
 
@@ -24,7 +25,12 @@ adminNoteTakerTaskRouter
   .route("/")
   .post(verifyTokenMiddleware, createNoteTakerTask);
 
-// assignCoderTasks
+// assignNoteTakerTasks
 adminNoteTakerTaskRouter
   .route("/assign/:noteTakerId")
   .patch(verifyTokenMiddleware, assignNoteTakerTasks);
+
+// updateNoteTakerTask
+adminNoteTakerTaskRouter
+  .route("/:noteTakerTaskId")
+  .patch(verifyTokenMiddleware, updateNoteTakerTask);

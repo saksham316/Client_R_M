@@ -120,10 +120,36 @@ export const updateCoderTask = async (req, res) => {
     }
 
     if (payload?.trackerFlag) {
+      if (payload?.taskTrackerField === "UNDER_QA") {
+        let assignedToQA = false;
+
+        const qaEmployees = await employeeModel.find({
+          role: "2",
+          subRole: "5",
+        });
+
+        for (let i = 0; i < qaEmployees.length; i++) {
+          if (qaEmployees[i]?.assignedTasks < 10) {
+            assignedToQA = true;
+            const emp = await employeeModel.findByIdAndUpdate(
+              { _id: qaEmployees[i]?._id },
+              {
+                $addToSet: { assignedTasks: coderTaskId },
+              }
+            );
+
+            const task = await coderTaskModel.findByIdAndUpdate(
+              { _id: coderTaskId },
+              { $set: { assignedToQA } }
+            );
+            break;
+          }
+        }
+      }
+
       let currentDate = moment().toISOString();
       let name = req?.userName;
       let employeeId = req?.userId;
-      console.log("this is the payload", payload);
       let taskTracker = {
         date: currentDate,
         name,

@@ -14,7 +14,12 @@ import { GoProjectRoadmap } from 'react-icons/go';
 import { LiaCubesSolid } from 'react-icons/lia';
 import { FaBucket } from 'react-icons/fa6';
 import { useSelector } from 'react-redux';
-import { allRoles, employeeSubRoles, managerSubRoles } from '../utils';
+import {
+  allRoles,
+  employeeSubRoles,
+  managerSubRoles,
+  qaManagerSubRole,
+} from '../utils';
 
 // -------------------------------------------------------------------------------
 
@@ -313,7 +318,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   );
                 }}
               </SidebarLinkGroup>
-              {/* Project module */}
+              {/* ----------------------------------Project module------------------------------------------ */}
               {allRoles.includes(
                 loggedInUserData?.data?.role.toString().trim()
               ) && (
@@ -395,7 +400,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                               ) ||
                               employeeSubRoles.includes(
                                 loggedInUserData?.data?.subRole
-                              )) && (
+                              ) ||
+                              qaManagerSubRole ===
+                                loggedInUserData?.data?.subRole) && (
                               <li>
                                 <NavLink
                                   to="/project"
@@ -429,7 +436,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                             {(adminRoleChecker() ||
                               managerSubRoles.includes(
                                 loggedInUserData?.data?.subRole
-                              )) && (
+                              ) ||
+                              qaManagerSubRole ===
+                                loggedInUserData?.data?.subRole) && (
                               <li>
                                 <NavLink
                                   to="/project/tasks-assignment"
@@ -446,7 +455,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                             {(adminRoleChecker() ||
                               managerSubRoles.includes(
                                 loggedInUserData?.data?.subRole
-                              )) && (
+                              ) ||
+                              qaManagerSubRole ===
+                                loggedInUserData?.data?.subRole) && (
                               <li>
                                 <NavLink
                                   to="/project/my-bucket"

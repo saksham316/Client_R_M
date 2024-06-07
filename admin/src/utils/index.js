@@ -7,6 +7,8 @@ export const adminRoles = ['0', '1'];
 // managerSubRoles - roles of the managers
 export const managerSubRoles = ['0', '1'];
 
-// employeeSubRoles - roles for the employees
-export const employeeSubRoles = ['3', '4'];
+// qaManagerSubRole - role  of the qa manager
+export const qaManagerSubRole = '2';
 
+// employeeSubRoles - roles for the employees
+export const employeeSubRoles = ['3', '4', '5'];

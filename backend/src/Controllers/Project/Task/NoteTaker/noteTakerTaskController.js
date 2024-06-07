@@ -100,6 +100,126 @@ export const createNoteTakerTask = async (req, res) => {
   }
 };
 
+// @desc - updating the note taker task
+// @route - PATCH /admin/task/noteTaker/:noteTakerTaskId
+// @access - public
+export const updateNoteTakerTask = async (req, res) => {
+  try {
+    const { noteTakerTaskId } = req?.params;
+
+    let userId = req?.userId;
+
+    let payload = req?.body?.payload;
+
+    if (!noteTakerTaskId) {
+      return res.status(400).json({
+        success: false,
+        message: "Note Taker Task Id is required",
+      });
+    }
+
+    if (!payload) {
+      return res.status(400).json({
+        success: false,
+        message: `Payload is required`,
+      });
+    }
+
+    if (payload?.trackerFlag) {
+      let currentDate = moment().toISOString();
+      let name = req?.userName;
+      let employeeId = req?.userId;
+      console.log("this is the payload", payload);
+      let taskTracker = {
+        date: currentDate,
+        name,
+        employeeId,
+        whereTowhere: {
+          from: payload?.from,
+          to: payload?.taskTrackerField,
+          reason: payload?.reason || "",
+        },
+      };
+      // const coderTaskDoc = await coderTaskModel.findByIdAndUpdate(
+      //   { _id: coderTaskId },
+      //   {
+      //     $set: { taskTrackerField: payload?.taskTrackerField },
+      //     $addToSet: { taskTracker },
+      //   },
+      //   {
+      //     new: true,
+      //   }
+      // );
+
+      let noteTakerTaskDoc = await noteTakerTaskModel.findOne({
+        _id: noteTakerTaskId,
+      });
+
+      let clonedNoteTakerTaskDoc = JSON.parse(JSON.stringify(noteTakerTaskDoc));
+
+      if (clonedNoteTakerTaskDoc) {
+        let assignedCapacity = JSON.parse(
+          JSON.stringify(clonedNoteTakerTaskDoc?.assignedCapacity)
+        );
+
+        for (let i = 0; i < assignedCapacity?.length; i++) {
+          if (assignedCapacity[i]?.assignedEmployeeId == `${userId}`) {
+            assignedCapacity[i].taskTrackerField = payload?.taskTrackerField;
+            assignedCapacity[i].taskTracker = [
+              ...assignedCapacity[i]?.taskTracker,
+              taskTracker,
+            ];
+            break;
+          }
+        }
+
+        clonedNoteTakerTaskDoc = {
+          ...clonedNoteTakerTaskDoc,
+          assignedCapacity,
+        };
+      }
+
+      await noteTakerTaskModel.findByIdAndUpdate(
+        { _id: noteTakerTaskId },
+        clonedNoteTakerTaskDoc,
+        {
+          new: true,
+        }
+      );
+    } else if (payload?.communicationDetailsFlag) {
+      const coderTaskDoc = await coderTaskModel.findByIdAndUpdate(
+        { _id: coderTaskId },
+        {
+          $addToSet: { communicationComments: payload?.communicationComments },
+        },
+        {
+          new: true,
+        }
+      );
+    } else {
+      const coderTaskDoc = await coderTaskModel.findByIdAndUpdate(
+        { _id: coderTaskId },
+        {
+          $set: payload,
+        },
+        {
+          new: true,
+        }
+      );
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Coder Task Updated Successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Internal Server Error! ${error.message}`,
+    });
+  }
+};
+
 // @desc - fetching all the noteTaker tasks only accessible by managers and admin and coders
 // @route - GET /admin/task/noteTaker
 // @access - public
@@ -198,11 +318,17 @@ export const getAllNoteTakerTasks = async (req, res) => {
 
     if (trackerField) {
       const [result] = await employeeModel.aggregate(pipelineWithTrackerField);
+      
+      let newResult = result?.populatedAssignedTasks.filter((task) => {
+        return task?.assignedCapacity[0]?.taskTrackerField === trackerField;
+      });
+      console.log("entered here")
+
       return res.status(200).json({
         success: true,
         message: "Note Taker Tasks Found Successfully",
         data: {
-          noteTakerTasks: result?.populatedAssignedTasks,
+          noteTakerTasks: newResult,
         },
       });
     } else {

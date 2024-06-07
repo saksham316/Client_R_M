@@ -7,6 +7,7 @@ import {
   fetchIdSpecificEmployeeDetails,
   getAllCoders,
   getAllNoteTakers,
+  getAllQAs,
   updateEmployeeDetails,
 } from '../../actions/auth/employeeActions';
 
@@ -21,6 +22,7 @@ const initialState = {
   isUserCreated: false,
   coders: [],
   noteTakers: [],
+  qas: [],
 };
 
 // -------------------------------------- Slices------------------------------------------------
@@ -192,6 +194,28 @@ const employeeSlice = createSlice({
         state.errorMessage = '';
       })
       .addCase(getAllNoteTakers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.errorMessage = action.payload;
+        toast.error(
+          state.errorMessage
+            ? state.errorMessage
+            : 'Sorry, something went wrong. Please try again later may be some Internal server error'
+        );
+      })
+      // getAllQAs lifecycle actions
+      .addCase(getAllQAs.pending, (state, action) => {
+        state.isLoading = true;
+        state.errorMessage = '';
+      })
+      .addCase(getAllQAs.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.noteTakers = [];
+        state.qas = action.payload;
+        state.coders = [];
+
+        state.errorMessage = '';
+      })
+      .addCase(getAllQAs.rejected, (state, action) => {
         state.isLoading = false;
         state.errorMessage = action.payload;
         toast.error(

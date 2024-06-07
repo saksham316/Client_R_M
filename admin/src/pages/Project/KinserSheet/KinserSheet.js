@@ -21,7 +21,7 @@ const KinserSheet = () => {
   const [coderSheetData, setCoderSheetData] = useState({});
   const [noteTakerSheetData, setNoteTakerSheetData] = useState([]);
 
-  const allowedExtensions = ['csv', 'xlsx'];
+  const allowedExtensions = ['csv', 'xlsx', 'vnd.ms-excel'];
 
   // --------------------------------------------------------------------------------------------------------
   // --------------------------------------------------Hooks-------------------------------------------------

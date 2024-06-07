@@ -7,12 +7,16 @@ import { updateCoderTask } from '../../../../features/actions/project/task/coder
 import toast from 'react-hot-toast';
 import { resetCoderTaskStatus } from '../../../../features/slices/project/task/coder/coderSlice';
 import { useSearchParams } from 'react-router-dom';
+import useAuth from '../../../../hooks/useAuth';
+import { updateQATask } from '../../../../features/actions/project/task/qa/qaActions';
+import { resetQATaskStatus } from '../../../../features/slices/project/task/qa/qaSlice';
 // -------------------------------------------------------------------------------------------------------
 export function QACommunicationModal({
-  showEditModal,
-  closeEditModal,
+  showCommunicationModal,
+  closeCommunicationModal,
   currentTask,
   fetchCoderTasks,
+  fetchQATasks,
 }) {
   // -------------------------------------------States---------------------------------------------------
   const commonStyles = {
@@ -36,6 +40,10 @@ export function QACommunicationModal({
 
   const { isCoderTaskUpdated } = useSelector((state) => state?.coderTask);
 
+  const { isQATaskUpdated } = useSelector((state) => state?.qaTask);
+
+  const { role, subRole } = useAuth();
+
   const {
     register,
     reset,
@@ -55,13 +63,18 @@ export function QACommunicationModal({
       };
 
       dispatch(
-        updateCoderTask({
-          payload,
-          coderTaskId: currentTask?._id,
-        })
+        role === '2' && subRole === '5'
+          ? updateQATask({
+              payload,
+              coderTaskId: currentTask?._id,
+            })
+          : updateCoderTask({
+              payload,
+              coderTaskId: currentTask?._id,
+            })
       );
     } else {
-      toast.error('Coder Task Id is required');
+      toast.error('Task Id is required');
     }
   };
 
@@ -90,13 +103,24 @@ export function QACommunicationModal({
       reset();
       closeModalRef?.current?.click();
     }
-  }, [isCoderTaskUpdated]);
+
+    if (isQATaskUpdated) {
+      let query = (() => {
+        let field = searchParams.get('trackerField');
+        return `trackerField=${field}`;
+      })();
+      fetchQATasks(query);
+      dispatch(resetQATaskStatus(false));
+      reset();
+      closeModalRef?.current?.click();
+    }
+  }, [isCoderTaskUpdated, isQATaskUpdated]);
 
   useEffect(() => {
-    if (showEditModal) {
+    if (showCommunicationModal) {
       setIsShowing(!isShowing);
     }
-  }, [showEditModal]);
+  }, [showCommunicationModal]);
   // -------------------------------------------------------------------------------------------------------
   const recordElements = [
     {
@@ -163,7 +187,7 @@ export function QACommunicationModal({
                     ref={closeModalRef}
                     onClick={() => {
                       setIsShowing(false);
-                      closeEditModal();
+                      closeCommunicationModal();
                     }}
                     className="inline-flex h-10 items-center justify-center gap-2 justify-self-center whitespace-nowrap rounded-full px-5 text-md font-medium tracking-wide  text-black transition duration-300 hover:bg-emerald-100 hover:text-emerald-600 focus:bg-emerald-200 focus:text-emerald-700 focus-visible:outline-none disabled:cursor-not-allowed disabled:text-emerald-300 disabled:shadow-none disabled:hover:bg-transparent"
                     aria-label="close dialog"

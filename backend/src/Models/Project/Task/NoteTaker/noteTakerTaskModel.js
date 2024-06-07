@@ -73,44 +73,44 @@ const taskSchema = new Schema({
       capacity: {
         type: String,
       },
-    },
-  ],
-  taskTracker: [
-    {
-      date: {
-        type: Date,
-      },
-      name: {
+      taskTrackerField: {
         type: String,
+        enum: [
+          "WORKFLOW",
+          "APPROVALS",
+          "RETURNED",
+          "PENDING",
+          "PLEASE_QA",
+          "COMMUNICATIONS",
+        ],
+        default: "WORKFLOW",
       },
-      employeeId: {
-        type: Schema.Types.ObjectId,
-      },
-      whereTowhere: {
-        from: {
-          type: String,
+      taskTracker: [
+        {
+          date: {
+            type: Date,
+          },
+          name: {
+            type: String,
+          },
+          employeeId: {
+            type: Schema.Types.ObjectId,
+          },
+          whereTowhere: {
+            from: {
+              type: String,
+            },
+            to: {
+              type: String,
+            },
+            reason: {
+              type: String,
+            },
+          },
         },
-        to: {
-          type: String,
-        },
-        reason: {
-          type: String,
-        },
-      },
+      ],
     },
   ],
-  taskTrackerField: {
-    type: String,
-    enum: [
-      "WORKFLOW",
-      "APPROVALS",
-      "RETURNED",
-      "PENDING",
-      "PLEASE_QA",
-      "COMMUNICATIONS",
-    ],
-    default: "WORKFLOW",
-  },
 });
 
 export const noteTakerTaskModel = mongoose.model("noteTakerTask", taskSchema);

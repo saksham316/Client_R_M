@@ -140,4 +140,22 @@ export const getAllNoteTakers = createAsyncThunk(
     }
   }
 );
+
+// getAllQAs -- action to fetch all the qas
+export const getAllQAs = createAsyncThunk(
+  'employees/getAllQAs',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`admin/employee/qa`, payload, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response?.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
 // ===================================================== THE END ===========================================

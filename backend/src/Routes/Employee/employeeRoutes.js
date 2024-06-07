@@ -7,6 +7,7 @@ import {
   getAllCoders,
   getAllEmployees,
   getAllNoteTakers,
+  getAllQAs,
   getIndividualEmployee,
   updateEmployee,
 } from "../../Controllers/Employee/employeeController.js";
@@ -31,6 +32,9 @@ adminEmployeeRouter.route("/coder").get(verifyTokenMiddleware, getAllCoders);
 adminEmployeeRouter
   .route("/noteTaker")
   .get(verifyTokenMiddleware, getAllNoteTakers);
+
+// getAllQAs
+adminEmployeeRouter.route("/qa").get(verifyTokenMiddleware, getAllQAs);
 
 // updateEmployee
 adminEmployeeRouter

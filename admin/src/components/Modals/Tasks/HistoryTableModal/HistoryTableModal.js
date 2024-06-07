@@ -13,6 +13,7 @@ import { FormLoader } from '../../../../common/Loader/FormLoaders/FormLoader';
 import { useSearchParams } from 'react-router-dom';
 import Select from 'react-select';
 import moment from 'moment';
+import useAuth from '../../../../hooks/useAuth';
 
 // -------------------------------------------------------------------------------------------------------
 export const HistoryTableModal = memo(
@@ -58,6 +59,8 @@ export const HistoryTableModal = memo(
     const { isCoderTaskLoading, isCoderTaskUpdated } = useSelector(
       (state) => state?.coderTask
     );
+
+    const { loggedInUserData } = useAuth();
 
     // -------------------------------------------------------------------------------------------------------
     // -------------------------------------------Functions---------------------------------------------------
@@ -108,7 +111,7 @@ export const HistoryTableModal = memo(
         {isShowing && typeof document !== 'undefined'
           ? ReactDOM.createPortal(
               <div
-                className="absolute top-0 left-0 z-98 flex pt-2 pb-2 w-full h-screen items-center justify-center bg-slate-300/20 backdrop-blur-sm overflow-y-auto"
+                className="absolute top-0 left-0 z-[71] flex pt-2 pb-2 w-full h-screen items-center justify-center bg-slate-300/20 backdrop-blur-sm overflow-y-auto"
                 aria-labelledby="header-2a content-2a"
                 aria-modal="true"
                 tabindex="-1"
@@ -116,7 +119,7 @@ export const HistoryTableModal = memo(
               >
                 {/*    <!-- Modal --> */}
                 <div
-                  className="flex  w-[50%] flex-col gap-6  rounded-lg bg-white border-2 p-6 text-slate-500 shadow-xl shadow-slate-700/10"
+                  className="flex  w-[50%] flex-col gap-6 h-[80vh]  rounded-lg bg-white border-2 p-6 text-slate-500 shadow-xl shadow-slate-700/10"
                   id="modal"
                   role="document"
                 >
@@ -173,15 +176,6 @@ export const HistoryTableModal = memo(
                             MRN Number
                           </p>
                         </div>
-                        <div>
-                          <p className="font-bold text-black mt-2">
-                            First Name
-                          </p>
-                          <p className="font-bold text-black mt-2">Last Name</p>
-                          <p className="font-bold text-black mt-2">
-                            MRN Number
-                          </p>
-                        </div>
                       </div>
 
                       <div class="relative overflow-x-auto">
@@ -206,28 +200,87 @@ export const HistoryTableModal = memo(
                             </tr>
                           </thead>
                           <tbody>
-                            {Array.isArray(currentTask?.taskTracker) &&
-                              currentTask?.taskTracker.map((taskHistory) => {
-                                return (
-                                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                    <th
-                                      scope="row"
-                                      class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                                    >
-                                      {taskHistory?.whereTowhere?.to}
-                                    </th>
-                                    <td class="px-6 py-4">
-                                      {moment(taskHistory?.date).format('LT')}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                      {moment(taskHistory?.date).format('LL')}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                      {taskHistory?.name}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
+                            {loggedInUserData?.data?.role === '2' &&
+                            loggedInUserData?.data?.subRole === '3'
+                              ? Array.isArray(currentTask?.taskTracker) &&
+                                currentTask?.taskTracker.map((taskHistory) => {
+                                  return (
+                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                      <th
+                                        scope="row"
+                                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                      >
+                                        {taskHistory?.whereTowhere?.to}
+                                      </th>
+                                      <td class="px-6 py-4">
+                                        {moment(taskHistory?.date).format('LT')}
+                                      </td>
+                                      <td class="px-6 py-4">
+                                        {moment(taskHistory?.date).format('LL')}
+                                      </td>
+                                      <td class="px-6 py-4">
+                                        {taskHistory?.name}
+                                      </td>
+                                    </tr>
+                                  );
+                                })
+                              : loggedInUserData?.data?.role === '2' &&
+                                loggedInUserData?.data?.subRole === '4'
+                              ? Array.isArray(
+                                  currentTask?.assignedCapacity[0]?.taskTracker
+                                ) &&
+                                currentTask?.assignedCapacity[0]?.taskTracker.map(
+                                  (taskHistory) => {
+                                    return (
+                                      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                        <th
+                                          scope="row"
+                                          class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                        >
+                                          {taskHistory?.whereTowhere?.to}
+                                        </th>
+                                        <td class="px-6 py-4">
+                                          {moment(taskHistory?.date).format(
+                                            'LT'
+                                          )}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                          {moment(taskHistory?.date).format(
+                                            'LL'
+                                          )}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                          {taskHistory?.name}
+                                        </td>
+                                      </tr>
+                                    );
+                                  }
+                                )
+                              : loggedInUserData?.data?.role === '2' &&
+                                loggedInUserData?.data?.subRole === '5'
+                              ? Array.isArray(currentTask?.taskTracker) &&
+                                currentTask?.taskTracker.map((taskHistory) => {
+                                  return (
+                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                      <th
+                                        scope="row"
+                                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                      >
+                                        {taskHistory?.whereTowhere?.to}
+                                      </th>
+                                      <td class="px-6 py-4">
+                                        {moment(taskHistory?.date).format('LT')}
+                                      </td>
+                                      <td class="px-6 py-4">
+                                        {moment(taskHistory?.date).format('LL')}
+                                      </td>
+                                      <td class="px-6 py-4">
+                                        {taskHistory?.name}
+                                      </td>
+                                    </tr>
+                                  );
+                                })
+                              : 'Invalid User'}
                           </tbody>
                         </table>
                       </div>

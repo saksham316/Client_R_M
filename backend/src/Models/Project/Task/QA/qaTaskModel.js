@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 // ---------------------------------------------------------------------------------------------------------
 
-const coderTaskSchema = new Schema({
+const qaTaskSchema = new Schema({
   taskName: {
     type: String,
     required: [true, "Task Name is a required field"], // sheet
@@ -119,7 +119,6 @@ const coderTaskSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "employee",
   },
-  assignedToQA: { type: Boolean, default: false },
 });
 
-export const coderTaskModel = mongoose.model("coderTask", coderTaskSchema);
+export const qaTaskModel = mongoose.model("qaTask", qaTaskSchema);

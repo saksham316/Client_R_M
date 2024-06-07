@@ -316,3 +316,23 @@ export const getAllNoteTakers = async (req, res) => {
     });
   }
 };
+
+// @desc - getting specific user data
+// @route - GET /admin/employee/qa
+// @access - private
+export const getAllQAs = async (req, res) => {
+  try {
+    const qas = await employeeModel.find({ subRole: "5" });
+
+    return res.status(200).json({
+      success: true,
+      message: "QAS Found Successfully",
+      data: { qas },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Internal Server Error! ${error.message}`,
+    });
+  }
+};

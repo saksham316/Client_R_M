@@ -28,6 +28,29 @@ export const createNoteTakerTask = createAsyncThunk(
   }
 );
 
+// updateNoteTakerTask Action
+export const updateNoteTakerTask = createAsyncThunk(
+  'noteTaker/updateNoteTakerTask',
+  async ({ payload, noteTakerTaskId }, { rejectWithValue }) => {
+    try {
+      const response = await instance.patch(
+        `/admin/task/noteTaker/${noteTakerTaskId}`,
+        { payload },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
 // getAllNoteTakerTasks Action
 export const getAllNoteTakerTasks = createAsyncThunk(
   'noteTakerTask/getAllNoteTakerTasks',

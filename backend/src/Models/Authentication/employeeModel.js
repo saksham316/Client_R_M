@@ -96,7 +96,7 @@ const employeeSchema = new mongoose.Schema(
         type: Schema.Types.ObjectId,
         ref: function () {
           if (this.role === "2") {
-            if (this.subRole === "3" || this.subRole === "0") {
+            if (this.subRole === "3" || this.subRole === "0" || this.subRole === "5" ) {
               return "coderTask";
             } else if (this.subRole === "4" || this.subRole === "1") {
               return "noteTakerTask";

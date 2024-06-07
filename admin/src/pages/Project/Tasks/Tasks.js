@@ -11,7 +11,10 @@ import Submissions from '../../../components/Tasks/Coder/Submissions/Submissions
 import Hold from '../../../components/Tasks/Coder/Hold/Hold';
 import Communications from '../../../components/Tasks/Coder/Communications/Communications';
 import UnderQA from '../../../components/Tasks/Coder/UnderQA/UnderQA';
-import WorkFlowNT from '../../../components/Tasks/NoteTaker/WorkFlowNT/WorkFlowNT';
+import Approvals from '../../../components/Tasks/NoteTaker/Approvals/Approvals';
+import Pending from '../../../components/Tasks/NoteTaker/Pending/Pending';
+import Returned from '../../../components/Tasks/NoteTaker/Returned/Returned';
+import PleaseQA from '../../../components/Tasks/NoteTaker/PleaseQA/PleaseQA';
 
 // -------------------------------------------------------------------------------------------------------------
 
@@ -35,21 +38,29 @@ const Tasks = () => {
     loggedInUserData?.data?.role === '2' &&
     loggedInUserData?.data?.subRole === '3'
       ? [
-          { title: 'Workflow', comp: <WorkFlow /> },
-          { title: 'Submissions', comp: <Submissions /> },
-          { title: 'Hold', comp: <Hold /> },
-          { title: 'Under QA', comp: <UnderQA /> },
-          { title: 'Communications', comp: <Communications /> },
-          { title: 'Others', comp: 'others' },
+          { title: 'Workflow' },
+          { title: 'Submissions' },
+          { title: 'Hold' },
+          { title: 'Under QA' },
+          { title: 'Communications' },
+          { title: 'Others' },
         ]
       : loggedInUserData?.data?.subRole === '4'
       ? [
-          { title: 'Workflow', comp: <WorkFlowNT /> },
-          { title: 'Approvals', comp: <Submissions /> },
-          { title: 'Returned', comp: <Hold /> },
-          { title: 'Pending', comp: <UnderQA /> },
-          { title: 'Please QA', comp: <Communications /> },
-          { title: 'Communications', comp: 'others' },
+          { title: 'Workflow' },
+          { title: 'Approvals' },
+          { title: 'Returned' },
+          { title: 'Pending' },
+          { title: 'Please QA' },
+          { title: 'Communications' },
+        ]
+      : loggedInUserData?.data?.subRole === '5'
+      ? [
+          { title: 'Workflow' },
+          { title: 'Submissions' },
+          { title: 'Hold' },
+          { title: 'Communications' },
+          { title: 'Others' },
         ]
       : [];
 
@@ -66,20 +77,24 @@ const Tasks = () => {
       : subRole === '4'
       ? {
           workflow: <WorkFlow status1Options={status1Options} />,
-          approvals: <Submissions status1Options={status1Options} />,
-          returned: <Hold status1Options={status1Options} />,
-          pending: <UnderQA status1Options={status1Options} />,
-          please_qa: <Communications />,
+          approvals: <Approvals status1Options={status1Options} />,
+          returned: <Returned status1Options={status1Options} />,
+          pending: <Pending status1Options={status1Options} />,
+          please_qa: <PleaseQA status1Options={status1Options} />,
           communications: 'comm',
+        }
+      : subRole === '5'
+      ? {
+          workflow: <WorkFlow status1Options={status1Options} />,
+          submissions: <Submissions status1Options={status1Options} />,
+          hold: <Hold status1Options={status1Options} />,
+          communications: <Communications />,
+          others: 'others',
         }
       : {};
 
-  const [index, setIndex] = useState(0);
-
   // ----------------------------------------------------------------------------------------------------------
   // ------------------------------------------------Hooks-----------------------------------------------------
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedField, setSelectedField] = useState('');
 

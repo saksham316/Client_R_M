@@ -5,6 +5,7 @@ import {
   assignNoteTakerTasks,
   createNoteTakerTask,
   getAllNoteTakerTasks,
+  updateNoteTakerTask,
 } from '../../../../actions/project/task/noteTaker/noteTakerActions';
 // -------------------------------------------------------------------------------------------------------------
 
@@ -79,6 +80,22 @@ const noteTakerTaskSlice = createSlice({
       .addCase(assignNoteTakerTasks.rejected, (state, action) => {
         state.isNoteTakerTaskLoading = false;
         state.isNoteTakerTasksAssigned = false;
+        state.errorMessage = action.payload;
+      })
+      //  updateNoteTakerTask lifecycle actions
+      .addCase(updateNoteTakerTask.pending, (state, action) => {
+        state.isNoteTakerTaskLoading = true;
+        state.errorMessage = '';
+        state.isNoteTakerTaskUpdated = false;
+      })
+      .addCase(updateNoteTakerTask.fulfilled, (state, action) => {
+        state.isNoteTakerTaskLoading = false;
+        state.isNoteTakerTaskUpdated = true;
+        state.errorMessage = '';
+      })
+      .addCase(updateNoteTakerTask.rejected, (state, action) => {
+        state.isNoteTakerTaskLoading = false;
+        state.isNoteTakerTaskUpdated = false;
         state.errorMessage = action.payload;
       });
   },

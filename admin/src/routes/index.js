@@ -144,14 +144,14 @@ const coreRoutes = [
     title: 'Project Dashboard',
     component: ProjectDashboard,
     allowedRoles: ['0', '1', '2'],
-    allowedSubRoles: ['0', '1', '2', '3', '4', '5'],
+    allowedSubRoles: ['0', '1', '2', '3', '4', '5', '2'],
   },
   {
     path: '/project/tasks-assignment',
     title: 'View Coder/NoteTaker Tasks',
     component: TasksManagement,
     allowedRoles: ['0', '1', '2'],
-    allowedSubRoles: ['0', '1'],
+    allowedSubRoles: ['0', '1', '2'],
   },
   {
     path: '/project/kinser-sheet',
@@ -165,7 +165,7 @@ const coreRoutes = [
     title: 'Tasks',
     component: Tasks,
     allowedRoles: ['0', '1', '2'],
-    allowedSubRoles: ['3', '4'],
+    allowedSubRoles: ['3', '4', '5'],
   },
   {
     path: '/project/my-bucket',

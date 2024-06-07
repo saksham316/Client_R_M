@@ -11,6 +11,12 @@ import {
 } from '../../../../features/actions/project/task/coder/coderActions';
 import { FormLoader } from '../../../../common/Loader/FormLoaders/FormLoader';
 import { useSearchParams } from 'react-router-dom';
+import useAuth from '../../../../hooks/useAuth';
+import {
+  getAllQATasks,
+  updateQATask,
+} from '../../../../features/actions/project/task/qa/qaActions';
+import { resetQATaskStatus } from '../../../../features/slices/project/task/qa/qaSlice';
 // -------------------------------------------------------------------------------------------------------
 export const WorkFlowEditModal = memo(
   ({
@@ -41,6 +47,7 @@ export const WorkFlowEditModal = memo(
     // -------------------------------------------------------------------------------------------------------
     // -------------------------------------------Hooks---------------------------------------------------
     const wrapperRef = useRef(null);
+    const { role, subRole } = useAuth();
 
     const dispatch = useDispatch();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -58,6 +65,10 @@ export const WorkFlowEditModal = memo(
       (state) => state?.coderTask
     );
 
+    const { isQATaskLoading, isQATaskUpdated } = useSelector(
+      (state) => state?.qaTask
+    );
+
     // -------------------------------------------------------------------------------------------------------
     // -------------------------------------------Functions---------------------------------------------------
 
@@ -73,11 +84,23 @@ export const WorkFlowEditModal = memo(
     const taskSubDataSavingHandler = (data) => {
       try {
         if (coderTaskId) {
-          const { coding, oasis, poc } = data;
-          const taskSubData = { coding, oasis, poc };
-          dispatch(updateCoderTask({ payload: { taskSubData }, coderTaskId }));
+          const { coding, oasis, qa, poc } = data;
+          const taskSubData =
+            role === '2' && subRole === '5'
+              ? { coding, oasis, qa, poc }
+              : { coding, oasis, poc };
+          role === '2' && subRole === '5'
+            ? dispatch(
+                updateQATask({
+                  payload: { taskSubData },
+                  coderTaskId,
+                })
+              )
+            : dispatch(
+                updateCoderTask({ payload: { taskSubData }, coderTaskId })
+              );
         } else {
-          toast.error('Coder Task Id not found!');
+          toast.error('Task Id not found!');
         }
       } catch (error) {
         toast.error(error.message);
@@ -87,6 +110,11 @@ export const WorkFlowEditModal = memo(
     // fetchCoderTasks
     const fetchCoderTasks = (query) => {
       dispatch(getAllCoderTasks(query));
+    };
+
+    // fetchQATasks
+    const fetchQATasks = (query) => {
+      dispatch(getAllQATasks(query));
     };
 
     // -------------------------------------------------------------------------------------------------------
@@ -119,7 +147,17 @@ export const WorkFlowEditModal = memo(
         dispatch(resetCoderTaskStatus(false));
         closeModalRef?.current?.click();
       }
-    }, [isCoderTaskUpdated]);
+
+      if (isQATaskUpdated) {
+        let query = (() => {
+          let field = searchParams.get('trackerField');
+          return `trackerField=${field}`;
+        })();
+        fetchQATasks(query);
+        dispatch(resetQATaskStatus(false));
+        closeModalRef?.current?.click();
+      }
+    }, [isCoderTaskUpdated, isQATaskUpdated]);
 
     useEffect(() => {
       if (currentTask) {
@@ -231,18 +269,20 @@ export const WorkFlowEditModal = memo(
           holdHandler(coderTaskId);
         },
       },
-      {
-        title: 'Under QA',
-        handler: () => {
-          underQaHandler(coderTaskId);
+      role === '2' &&
+        subRole != '5' && {
+          title: 'Under QA',
+          handler: () => {
+            underQaHandler(coderTaskId);
+          },
         },
-      },
-      {
-        title: 'Submit',
-        handler: () => {
-          submissionHandler(coderTaskId);
+      role === '2' &&
+        subRole != '5' && {
+          title: 'Submit',
+          handler: () => {
+            submissionHandler(coderTaskId);
+          },
         },
-      },
     ];
 
     // -------------------------------------------------------------------------------------------------------
@@ -252,7 +292,7 @@ export const WorkFlowEditModal = memo(
         {isShowing && typeof document !== 'undefined'
           ? ReactDOM.createPortal(
               <div
-                className="absolute top-0 left-0 z-98 flex pt-2 pb-2 w-full h-screen items-center justify-center bg-slate-300/20 backdrop-blur-sm overflow-y-auto"
+                className="absolute top-0 left-0 z-[71] flex pt-2 pb-2 w-full h-screen items-center justify-center bg-slate-300/20 backdrop-blur-sm overflow-y-auto"
                 aria-labelledby="header-2a content-2a"
                 aria-modal="true"
                 tabindex="-1"
@@ -303,7 +343,7 @@ export const WorkFlowEditModal = memo(
                     </button>
                   </header>
                   {/*        <!-- Modal body --> */}
-                  {isCoderTaskLoading ? (
+                  {isCoderTaskLoading || isQATaskLoading ? (
                     <FormLoader />
                   ) : (
                     <form
@@ -331,14 +371,16 @@ export const WorkFlowEditModal = memo(
                         <div className="recordButtons flex gap-3 justify-center mt-2">
                           {recordButtons.map((btn, index) => {
                             return (
-                              <button
-                                className="p-2 sm:p-4 rounded-full bg-blue-950 font-bold text-white text-[13px] sm:text-sm md:text-lg"
-                                key={index}
-                                type={`${index === 0 ? 'submit' : 'button'}`}
-                                onClick={index != 0 ? btn.handler : null}
-                              >
-                                {btn.title}
-                              </button>
+                              btn && (
+                                <button
+                                  className="p-2 sm:p-4 rounded-full bg-blue-950 font-bold text-white text-[13px] sm:text-sm md:text-lg"
+                                  key={index}
+                                  type={`${index === 0 ? 'submit' : 'button'}`}
+                                  onClick={index != 0 ? btn.handler : null}
+                                >
+                                  {btn.title}
+                                </button>
+                              )
                             );
                           })}
                         </div>
